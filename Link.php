@@ -4,7 +4,7 @@ require_once(dirname(__FILE__) . '/LinkPeer.php');
 /**
  * Link the class that defines a link
  * 
- * @author Paul Matthews <pmatthews@ibuildings.nl>
+ * @author Paul Matthews <pmatthews@ibuildings.com>
  */
 class Link {
     /**
