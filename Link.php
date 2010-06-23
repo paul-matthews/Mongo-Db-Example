@@ -1,56 +1,136 @@
 <?php
 require_once(dirname(__FILE__) . '/LinkPeer.php');
 
+/**
+ * Link the class that defines a link
+ * 
+ * @author Paul Matthews <pmatthews@ibuildings.nl>
+ */
 class Link {
+    /**
+     * url of the link
+     * 
+     * @var string
+     * @access private
+     */
     private $url;
+    /**
+     * tags describing the link
+     * 
+     * @var array
+     * @access private
+     */
     private $tags = array();
 
+    /**
+     * setUrl to set the url of the link
+     * 
+     * @param string $url 
+     * @access public
+     * @return void
+     */
     public function setUrl($url) {
-        $this->url = $url;
+        $this->url = (string) $url;
     }
 
+    /**
+     * addTag - add a tag to describe the link
+     * 
+     * @param string $tag 
+     * @access public
+     * @return void
+     */
     public function addTag($tag) {
-        $this->tags[] = $tag;
+        $this->tags[] = (string) $tag;
     }
 
+    /**
+     * removeTag - remove every instance of a tag from the tags list
+     * 
+     * @param mixed $tag 
+     * @access public
+     * @return boolean true if the tag was found and removed false if 
+     *                 the tag didn't exist
+     */
     public function removeTag($tag) {
-        foreach($this->tags as $k => $v) {
-            if($v == $tag) {
-                unset($this->tags[$k]);
-                return true;
+        $success = false;
+        // look through the current tags for the specified tag
+        foreach($this->tags as $key => $tagName) {
+            if($tagName == $tag) {
+                // remove the tag from the list
+                unset($this->tags[$key]);
+                $success = true;
             }
         }
-        return false;
+        return $success;
     }
 
+    /**
+     * getUrl - retrieve the url of the link
+     * 
+     * @access public
+     * @return string the url
+     */
     public function getUrl() {
         return $this->url;
     }
 
+    /**
+     * getTags the array of tags describing the link
+     * 
+     * @access public
+     * @return array of tags
+     */
     public function getTags() {
         return $this->tags;
     }
 
+    /**
+     * __toString to make a sensible string out of the link object
+     * 
+     * @access public
+     * @return string the string description of the link
+     */
     public function __toString() {
+        // example: http:://www.google.com/ [usa, search]
         return "{$this->url} [". implode(', ', $this->tags) ."]";
     }
 
+    /**
+     * toArray convert a link object to an array representation
+     * 
+     * @access public
+     * @return array the link representation
+     */
     public function toArray() {
         return array(
+            // _id is the name of the url in this case as it makes it easier 
+              // for interoperability with the Database
             '_id' => $this->url,
             'tags' => $this->tags,
         );
     }
 
+    /**
+     * fromArray read the properties of the link from an array
+     * 
+     * @param array $link the properties as produced from the toArray() method
+     * @access public
+     * @throws Exception
+     * @return this object
+     */
     public function fromArray($link) {
-        foreach(array('_id') as $req) {
-            if(!isset($link[$req]))
-                throw new Exception('Incorrect data supplied');
-        }
+        // Ensure the _id is set
+        if(!isset($link['_id']))
+            throw new Exception('Incorrect data supplied');
 
         $this->url = $link['_id'];
+
+        // Only set tags if they conform to our structure
         if(isset($link['tags']) && is_array($link['tags'])) {
             $this->tags = $link['tags'];
         }
+
+        return $this;
     }
 }

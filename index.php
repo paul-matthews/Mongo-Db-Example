@@ -23,7 +23,10 @@ $results = getAllAsArray();
         </form>
 <?php else: ?>
         <h2>Link Inserted!</h2>
-        <p>Your link has been inserted.</p>
+        <p>
+            Your link has been inserted.<br />
+            <a href="">Insert another.</a>
+        </p>
 <?php endif ?>
     </div>
     <div>
