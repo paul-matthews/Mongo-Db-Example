@@ -1,0 +1,11 @@
+PHP MongoDB Example
+###################
+
+A small project to demonstrate useage of the PHP MongoDB extension.
+
+This is by no means an extensive demonstration of what mongo can do, however this might provide a starting point for people who've found a need for MongoDb. This also uses a suggestion that Matthew Weier O'Phiney suggested in his talk on NoSQL at http://phpconference.nl/ in 2010.
+
+Please correct / extend this example and feedback to me any changes / requests you have / would like to make.
+
+
+May this be the start of some happy MongoDB-ing.
