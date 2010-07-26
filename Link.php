@@ -23,6 +23,16 @@ class Link {
     private $tags = array();
 
     /**
+     * A standard constructor that does nothing
+     * 
+     * @return mixed
+     */
+    public function __construct()
+    {
+        // Not required to do anything at this time.
+    }
+
+    /**
      * setUrl to set the url of the link
      * 
      * @param string $url 
