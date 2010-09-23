@@ -2,9 +2,9 @@
 require_once(dirname(__FILE__) . '/Link.php');
 
 /**
- * LinkPeer - interacts with the persistence layer to offer common 
+ * LinkPeer - interacts with the persistence layer to offer common
  *            methods such as retrieval and storing
- * 
+ *
  * @author Paul Matthews <pmatthews@ibuildings.com>
  */
 class LinkPeer {
@@ -15,14 +15,14 @@ class LinkPeer {
     /**
      * db the database to interact with
      *   MongoDb in this example
-     * 
+     *
      * @var MongoDb
      * @access private
      */
     private $db;
     /**
      * collection a handle to the the current database collection
-     * 
+     *
      * @var MongoCollection
      * @access private
      */
@@ -30,8 +30,8 @@ class LinkPeer {
 
     /**
      * __construct requires an instance of the database to interact with
-     * 
-     * @param MongoDb $db 
+     *
+     * @param MongoDb $db
      * @access public
      * @return void
      */
@@ -40,15 +40,27 @@ class LinkPeer {
     }
 
     /**
-     * insert a link into the persistence layer
-     * 
+     * insert a link or update it
+     *
      * @param Link $link to be inserted into the database
      * @access public
-     * @return true if the insertion succeeded
+     * @return boolean true if the insertion succeeded
      */
     public function insert(Link $link)
     {
-        if($this->getCollection()->save($link->toArray())) {
+        return $this->update($link);
+    }
+
+    /**
+     * update a link or create it
+     *
+     * @param Link $link to be inserted into the database
+     * @access public
+     * @return boolean true if the insertion succeeded
+     */
+    public function update(Link $link)
+    {
+        if ($this->getCollection()->save($link->toArray())) {
             return true;
         }
 
@@ -56,8 +68,34 @@ class LinkPeer {
     }
 
     /**
+     * delete a link
+     *
+     * @param Link $link the link to be removed
+     * @access public
+     * @return boolean true if the delete succeeded
+     */
+    public function delete(Link $link)
+    {
+        $link = $link->toArray();
+        if (!empty($link['_id'])) {
+            $linkKey = $linkKey['_id'];
+            $options = array(
+                'fsync' => true, // Forces the update to be synced to disk
+            );
+            try {
+                if ($this->getCollection()->remove($linkKey, $options)) {
+                    return true;
+                }
+            } catch (MongoException $e) {
+                // @TODO log the error
+            }
+        }
+        return false;
+    }
+
+    /**
      * fetchAll returns all the links in the current collection
-     * 
+     *
      * @access public
      * @return Array<Link> the array of links
      */
@@ -65,7 +103,7 @@ class LinkPeer {
         $results = array();
 
         // perform a find with a blank query
-        foreach($this->getCollection()->find() as $result) {
+        foreach ($this->getCollection()->find() as $result) {
             // Create a Link out of each of the results
             $results[] = $this->factory($result);
         }
@@ -75,7 +113,7 @@ class LinkPeer {
 
     /**
      * fetchByUrl retrieves a link object by url
-     * 
+     *
      * @param string $url the url to fetch Links by
      * @access public
      * @return Link the corresponding Link object or null if none is found
@@ -84,7 +122,7 @@ class LinkPeer {
         $response = $this->getCollection()->findOne(array('_id' => $url));
 
         // if the database returns a result return the link
-        if($response)
+        if ($response)
             return $this->factory($response);
 
         // Otherwise return null
@@ -93,14 +131,15 @@ class LinkPeer {
 
     /**
      * fetchByTag retreves links by tag
-     * 
+     *
      * @param string $tag the tag to fetch Links by
      * @access public
      * @return Array<Link> the array of links
      */
     public function fetchByTag($tag) {
         $results = array();
-        foreach($this->getCollection()->find(array('tags' => $tag)) as $result) {
+        $collection = $this->getCollection();
+        foreach ($collection->find(array('tags' => $tag)) as $result) {
             $results[] = $this->factory($result);
         }
         return $results;
@@ -108,25 +147,28 @@ class LinkPeer {
 
     /**
      * getCollection get a handle to the collection object
-     * 
+     *
      * @access private
-     * @return MongoCollection
+     * @return MongoCollection the mongo collection class reffering to the
+     *                         appropriate dataset
      */
     private function getCollection() {
         // if the collection is not already cached
-        if(empty($this->collection)) {
+        if (empty($this->collection)) {
 
             // selects the collection if it exists
-            foreach($this->db->listCollections() as $collection) {
-                if($collection->getName() == self::COLLECTION) {
+            foreach ($this->db->listCollections() as $collection) {
+                if ($collection->getName() == self::COLLECTION) {
                     $this->collection = $collection;
                     break;
                 }
             }
 
             // or creates a new one if it doesn't
-            if(empty($this->collection)) {
-                $this->collection = $this->db->createCollection(self::COLLECTION);
+            if (empty($this->collection)) {
+                $this->collection = $this->db->createCollection(
+                    self::COLLECTION
+                );
             }
         }
 
@@ -134,15 +176,15 @@ class LinkPeer {
     }
 
     /**
-     * factory get a new instance of a Link from an array defining 
+     * factory get a new instance of a Link from an array defining
      *   it's properties in the Link->toArray() format
-     * 
+     *
      * @param array $linkArray the array defining the Link object
      * @access private
      * @return Link the link object as populated by the linkArray
      */
     private function factory($linkArray) {
-        if(!isset($linkArray['_id']))
+        if (!isset($linkArray['_id']))
             throw new Exception('Missing data');
 
         $id = $linkArray['_id'];

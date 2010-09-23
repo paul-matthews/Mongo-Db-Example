@@ -3,20 +3,20 @@ require_once(dirname(__FILE__) . '/LinkPeer.php');
 
 /**
  * Link the class that defines a link
- * 
+ *
  * @author Paul Matthews <pmatthews@ibuildings.com>
  */
 class Link {
     /**
      * url of the link
-     * 
+     *
      * @var string
      * @access private
      */
     private $url;
     /**
      * tags describing the link
-     * 
+     *
      * @var array
      * @access private
      */
@@ -24,7 +24,7 @@ class Link {
 
     /**
      * A standard constructor that does nothing
-     * 
+     *
      * @return mixed
      */
     public function __construct()
@@ -33,51 +33,8 @@ class Link {
     }
 
     /**
-     * setUrl to set the url of the link
-     * 
-     * @param string $url 
-     * @access public
-     * @return void
-     */
-    public function setUrl($url) {
-        $this->url = (string) $url;
-    }
-
-    /**
-     * addTag - add a tag to describe the link
-     * 
-     * @param string $tag 
-     * @access public
-     * @return void
-     */
-    public function addTag($tag) {
-        $this->tags[] = (string) $tag;
-    }
-
-    /**
-     * removeTag - remove every instance of a tag from the tags list
-     * 
-     * @param mixed $tag 
-     * @access public
-     * @return boolean true if the tag was found and removed false if 
-     *                 the tag didn't exist
-     */
-    public function removeTag($tag) {
-        $success = false;
-        // look through the current tags for the specified tag
-        foreach($this->tags as $key => $tagName) {
-            if($tagName == $tag) {
-                // remove the tag from the list
-                unset($this->tags[$key]);
-                $success = true;
-            }
-        }
-        return $success;
-    }
-
-    /**
      * getUrl - retrieve the url of the link
-     * 
+     *
      * @access public
      * @return string the url
      */
@@ -87,7 +44,7 @@ class Link {
 
     /**
      * getTags the array of tags describing the link
-     * 
+     *
      * @access public
      * @return array of tags
      */
@@ -96,8 +53,51 @@ class Link {
     }
 
     /**
+     * setUrl to set the url of the link
+     *
+     * @param string $url
+     * @access public
+     * @return void
+     */
+    public function setUrl($url) {
+        $this->url = (string) $url;
+    }
+
+    /**
+     * addTag - add a tag to describe the link
+     *
+     * @param string $tag
+     * @access public
+     * @return void
+     */
+    public function addTag($tag) {
+        $this->tags[] = (string) $tag;
+    }
+
+    /**
+     * removeTag - remove every instance of a tag from the tags list
+     *
+     * @param mixed $tag
+     * @access public
+     * @return boolean true if the tag was found and removed false if
+     *                 the tag didn't exist
+     */
+    public function removeTag($tag) {
+        $success = false;
+        // look through the current tags for the specified tag
+        foreach ($this->tags as $key => $tagName) {
+            if ($tagName == $tag) {
+                // remove the tag from the list
+                unset($this->tags[$key]);
+                $success = true;
+            }
+        }
+        return $success;
+    }
+
+    /**
      * __toString to make a sensible string out of the link object
-     * 
+     *
      * @access public
      * @return string the string description of the link
      */
@@ -108,13 +108,13 @@ class Link {
 
     /**
      * toArray convert a link object to an array representation
-     * 
+     *
      * @access public
      * @return array the link representation
      */
     public function toArray() {
         return array(
-            // _id is the name of the url in this case as it makes it easier 
+            // _id is the name of the url in this case as it makes it easier
               // for interoperability with the Database
             '_id' => $this->url,
             'tags' => $this->tags,
@@ -123,7 +123,7 @@ class Link {
 
     /**
      * fromArray read the properties of the link from an array
-     * 
+     *
      * @param array $link the properties as produced from the toArray() method
      * @access public
      * @throws Exception
@@ -131,13 +131,13 @@ class Link {
      */
     public function fromArray($link) {
         // Ensure the _id is set
-        if(!isset($link['_id']))
+        if (!isset($link['_id']))
             throw new Exception('Incorrect data supplied');
 
         $this->url = $link['_id'];
 
         // Only set tags if they conform to our structure
-        if(isset($link['tags']) && is_array($link['tags'])) {
+        if (isset($link['tags']) && is_array($link['tags'])) {
             $this->tags = $link['tags'];
         }
 
