@@ -7,7 +7,8 @@ require_once(dirname(__FILE__) . '/Link.php');
  *
  * @author Paul Matthews <pmatthews@ibuildings.com>
  */
-class LinkPeer {
+class LinkPeer
+{
     /**
      *  The collection to be used within the database
      */
@@ -44,7 +45,8 @@ class LinkPeer {
      * @access public
      * @return void
      */
-    public function __construct(MongoDb $db) {
+    public function __construct(MongoDb $db)
+    {
         $this->db = $db;
     }
 
@@ -90,12 +92,17 @@ class LinkPeer {
         $link = $this->translateDataset($link->toArray(), true);
 
         $linkKey = $this->getIdFromDataset($link);
+        $key = array(
+            '_id' => $linkKey,
+        );
+
         if ($linkKey) {
             $options = array(
                 'fsync' => true, // Forces the update to be synced to disk
             );
             try {
-                if ($this->getCollection()->remove($linkKey, $options)) {
+                if ($this->getCollection()->remove($key, $options)) {
+
                     return true;
                 }
             } catch (MongoException $e) {
@@ -111,7 +118,8 @@ class LinkPeer {
      * @access public
      * @return Array<Link> the array of links
      */
-    public function fetchAll() {
+    public function fetchAll()
+    {
         $results = array();
 
         // perform a find with a blank query
@@ -130,15 +138,18 @@ class LinkPeer {
      * @access public
      * @return Link the corresponding Link object or null if none is found
      */
-    public function fetchByUrl($url) {
+    public function fetchByUrl($url)
+    {
         $query = array('url' => $url);
+        $mongoQuery = $this->translateDataset($query);
         $response = $this->getCollection()->findOne(
-            $this->translateDataset($query, false)
+            $mongoQuery
         );
 
         // if the database returns a result return the link
-        if ($response)
+        if ($response) {
             return $this->factory($response);
+        }
 
         // Otherwise return null
         return null;
@@ -151,7 +162,8 @@ class LinkPeer {
      * @access public
      * @return Array<Link> the array of links
      */
-    public function fetchByTag($tag) {
+    public function fetchByTag($tag)
+    {
         $results = array();
         $collection = $this->getCollection();
         foreach ($collection->find(array('tags' => $tag)) as $result) {
@@ -167,11 +179,12 @@ class LinkPeer {
      * @access public
      * @return mixed the id string if its set or false if it isn't
      */
-    public function getIdFromDataset(array $data) {
-        if (!isset($data[self::ID_FIELD])) {
+    public function getIdFromDataset(array $data)
+    {
+        if (!isset($data[self::DB_ID_FIELD])) {
             return false;
         }
-        return $data[self::ID_FIELD];
+        return $data[self::DB_ID_FIELD];
     }
 
 
@@ -183,7 +196,8 @@ class LinkPeer {
      * @access public
      * @return mixed the dataset or false if the key couldn't be found
      */
-    public function translateDataset(array $data, $toDb = true) {
+    public function translateDataset(array $data, $toDb = true)
+    {
         $keyFrom = self::ID_FIELD;
         $keyTo = self::DB_ID_FIELD;
         if (!$toDb)  {
@@ -207,11 +221,13 @@ class LinkPeer {
      * @return MongoCollection the mongo collection class reffering to the
      *                         appropriate dataset
      */
-    private function getCollection() {
+    private function getCollection()
+    {
         // if the collection is not already cached
         if (empty($this->collection)) {
 
             // selects the collection if it exists
+            $this->collection = $this->db->selectCollection(self::COLLECTION);
             foreach ($this->db->listCollections() as $collection) {
                 if ($collection->getName() == self::COLLECTION) {
                     $this->collection = $collection;
@@ -238,11 +254,13 @@ class LinkPeer {
      * @access private
      * @return Link the link object as populated by the linkArray
      */
-    private function factory($linkArray) {
-        if (!isset($linkArray['_id']))
+    private function factory($linkArray)
+    {
+        if (!isset($linkArray['_id'])) {
             throw new Exception('Missing data');
+        }
 
-        $linkArray = $this->translateDataset($link->toArray(), false);
+        $linkArray = $this->translateDataset($linkArray, false);
 
         $tmp = new Link();
         return $tmp->fromArray($linkArray);

@@ -144,7 +144,7 @@ class Link {
         if (!empty($link['tags']) && is_array($link['tags'])) {
             foreach ($link['tags'] as $tag) {
                 if (is_string($tag)) {
-                    $tags[] = $tags;
+                    $tags[] = $tag;
                 }
             }
         }
