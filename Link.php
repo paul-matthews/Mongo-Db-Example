@@ -38,7 +38,8 @@ class Link {
      * @access public
      * @return string the url
      */
-    public function getUrl() {
+    public function getUrl()
+    {
         return $this->url;
     }
 
@@ -48,7 +49,8 @@ class Link {
      * @access public
      * @return array of tags
      */
-    public function getTags() {
+    public function getTags()
+    {
         return $this->tags;
     }
 
@@ -59,7 +61,8 @@ class Link {
      * @access public
      * @return void
      */
-    public function setUrl($url) {
+    public function setUrl($url)
+    {
         $this->url = (string) $url;
     }
 
@@ -70,7 +73,8 @@ class Link {
      * @access public
      * @return void
      */
-    public function addTag($tag) {
+    public function addTag($tag)
+    {
         $this->tags[] = (string) $tag;
     }
 
@@ -82,7 +86,8 @@ class Link {
      * @return boolean true if the tag was found and removed false if
      *                 the tag didn't exist
      */
-    public function removeTag($tag) {
+    public function removeTag($tag)
+    {
         $success = false;
         // look through the current tags for the specified tag
         foreach ($this->tags as $key => $tagName) {
@@ -101,7 +106,8 @@ class Link {
      * @access public
      * @return string the string description of the link
      */
-    public function __toString() {
+    public function __toString()
+    {
         // example: http://www.google.com/ [usa, search]
         return sprintf('%s [%s]', $this->url, implode(', ', $this->tags));
     }
@@ -112,7 +118,8 @@ class Link {
      * @access public
      * @return array the link representation
      */
-    public function toArray() {
+    public function toArray()
+    {
         return array(
             // _id is the name of the url in this case as it makes it easier
               // for interoperability with the Database
@@ -131,7 +138,8 @@ class Link {
      * @throws Exception
      * @return this object
      */
-    public function fromArray($link) {
+    public function fromArray($link)
+    {
         // Ensure the url is set
         if (empty($link['url']) || !is_string($link['url'])) {
             throw new Exception('Incorrect data supplied');
