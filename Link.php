@@ -102,8 +102,8 @@ class Link {
      * @return string the string description of the link
      */
     public function __toString() {
-        // example: http:://www.google.com/ [usa, search]
-        return "{$this->url} [". implode(', ', $this->tags) ."]";
+        // example: http://www.google.com/ [usa, search]
+        return sprintf('%s [%s]', $this->url, implode(', ', $this->tags));
     }
 
     /**
@@ -116,7 +116,7 @@ class Link {
         return array(
             // _id is the name of the url in this case as it makes it easier
               // for interoperability with the Database
-            '_id' => $this->url,
+            'url' => $this->url,
             'tags' => $this->tags,
         );
     }
@@ -124,22 +124,31 @@ class Link {
     /**
      * fromArray read the properties of the link from an array
      *
+     * Caution: overwrites existing data
+     *
      * @param array $link the properties as produced from the toArray() method
      * @access public
      * @throws Exception
      * @return this object
      */
     public function fromArray($link) {
-        // Ensure the _id is set
-        if (!isset($link['_id']))
+        // Ensure the url is set
+        if (empty($link['url']) || !is_string($link['url'])) {
             throw new Exception('Incorrect data supplied');
+        }
 
-        $this->url = $link['_id'];
+        $this->url = $link['url'];
 
         // Only set tags if they conform to our structure
-        if (isset($link['tags']) && is_array($link['tags'])) {
-            $this->tags = $link['tags'];
+        $tags = array();
+        if (!empty($link['tags']) && is_array($link['tags'])) {
+            foreach ($link['tags'] as $tag) {
+                if (is_string($tag)) {
+                    $tags[] = $tags;
+                }
+            }
         }
+        $this->tags = $tags;
 
         return $this;
     }

@@ -13,6 +13,15 @@ class LinkPeer {
      */
     const COLLECTION = 'link';
     /**
+     * The id filed in the dataset
+     */
+    const ID_FIELD = 'url';
+    /**
+     * The id filed for the database
+     */
+    const DB_ID_FIELD = '_id';
+
+    /**
      * db the database to interact with
      *   MongoDb in this example
      *
@@ -60,7 +69,9 @@ class LinkPeer {
      */
     public function update(Link $link)
     {
-        if ($this->getCollection()->save($link->toArray())) {
+        $data = $this->translateDataset($link->toArray(), true);
+
+        if ($data && $this->getCollection()->save($data)) {
             return true;
         }
 
@@ -76,9 +87,10 @@ class LinkPeer {
      */
     public function delete(Link $link)
     {
-        $link = $link->toArray();
-        if (!empty($link['_id'])) {
-            $linkKey = $linkKey['_id'];
+        $link = $this->translateDataset($link->toArray(), true);
+
+        $linkKey = $this->getIdFromDataset($link);
+        if ($linkKey) {
             $options = array(
                 'fsync' => true, // Forces the update to be synced to disk
             );
@@ -119,7 +131,10 @@ class LinkPeer {
      * @return Link the corresponding Link object or null if none is found
      */
     public function fetchByUrl($url) {
-        $response = $this->getCollection()->findOne(array('_id' => $url));
+        $query = array('url' => $url);
+        $response = $this->getCollection()->findOne(
+            $this->translateDataset($query, false)
+        );
 
         // if the database returns a result return the link
         if ($response)
@@ -143,6 +158,46 @@ class LinkPeer {
             $results[] = $this->factory($result);
         }
         return $results;
+    }
+
+    /**
+     * Get the value from the dataset
+     *
+     * @param array $data
+     * @access public
+     * @return mixed the id string if its set or false if it isn't
+     */
+    public function getIdFromDataset(array $data) {
+        if (!isset($data[self::ID_FIELD])) {
+            return false;
+        }
+        return $data[self::ID_FIELD];
+    }
+
+
+    /**
+     * Prepare the dataset for use with the database or the application.
+     *
+     * @param array $data the data for the non peer object
+     * @param mixed $toDb true if to database, false to application
+     * @access public
+     * @return mixed the dataset or false if the key couldn't be found
+     */
+    public function translateDataset(array $data, $toDb = true) {
+        $keyFrom = self::ID_FIELD;
+        $keyTo = self::DB_ID_FIELD;
+        if (!$toDb)  {
+            $keyFrom = self::DB_ID_FIELD;
+            $keyTo = self::ID_FIELD;
+        }
+
+        if (!isset($data[$keyFrom])) {
+            return false;
+        }
+
+        $data[$keyTo] = $data[$keyFrom];
+        unset($data[$keyFrom]);
+        return $data;
     }
 
     /**
@@ -187,7 +242,7 @@ class LinkPeer {
         if (!isset($linkArray['_id']))
             throw new Exception('Missing data');
 
-        $id = $linkArray['_id'];
+        $linkArray = $this->translateDataset($link->toArray(), false);
 
         $tmp = new Link();
         return $tmp->fromArray($linkArray);
