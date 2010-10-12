@@ -228,12 +228,6 @@ class LinkPeer
 
             // selects the collection if it exists
             $this->collection = $this->db->selectCollection(self::COLLECTION);
-            foreach ($this->db->listCollections() as $collection) {
-                if ($collection->getName() == self::COLLECTION) {
-                    $this->collection = $collection;
-                    break;
-                }
-            }
 
             // or creates a new one if it doesn't
             if (empty($this->collection)) {
